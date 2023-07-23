@@ -1,13 +1,10 @@
+This project is part of the [Alchemy University Ethereum Developer Bootcamp]
+
 ## ECDSA Node
 
 This project is an example of using a client and server to facilitate transfers between different addresses. Since there is just a single server on the back-end handling transfers, this is clearly very centralized. We won't worry about distributed consensus for this project.
 
-However, something that we would like to incoporate is Public Key Cryptography. By using Elliptic Curve Digital Signatures we can make it so the server only allows transfers that have been signed for by the person who owns the associated address.
-
-### Video instructions
-For an overview of this project as well as getting started instructions, check out the following video:
-
-https://www.loom.com/share/0d3c74890b8e44a5918c4cacb3f646c4
+You can transfer funds from an account using his associated private key to another account suing his public key. To ensure that the person trying to move the fund is the owner, a message is signed using the private key. Then the signed message is sent to the server that will check if the signed message is associated to the sender account. If the sender possess the funds and the signed message is correct, the funds will be sent. To ensure that a signed message can't be used again to process the same transaction again and again, a nonce representing the number of transaction done is included in the signed message.
  
 ### Client
 
