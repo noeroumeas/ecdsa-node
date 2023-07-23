@@ -1,7 +1,8 @@
 import { useState } from "react";
 import server from "./server";
-
-function Transfer({ address, setBalance }) {
+import { secp256k1 } from 'ethereum-cryptography/secp256k1';
+import { toHex } from 'ethereum-cryptography/utils';
+function Transfer({ privateKey, setBalance }) {
   const [sendAmount, setSendAmount] = useState("");
   const [recipient, setRecipient] = useState("");
 
@@ -9,18 +10,28 @@ function Transfer({ address, setBalance }) {
 
   async function transfer(evt) {
     evt.preventDefault();
-
     try {
+      const amount = parseInt(sendAmount);
+      const address = toHex(secp256k1.getPublicKey(privateKey));
+      const { data: { nonce } } = await server.get(`nonce/${address}`);
+      const msg = new TextEncoder().encode(`${nonce} transfer ${amount} to ${recipient}`);
+      const sig = secp256k1.sign(msg, privateKey).toCompactHex();
       const {
         data: { balance },
       } = await server.post(`send`, {
         sender: address,
-        amount: parseInt(sendAmount),
+        amount,
         recipient,
+        sig,
       });
       setBalance(balance);
     } catch (ex) {
-      alert(ex.response.data.message);
+      if(ex.response)
+        alert(ex.response.data.message);
+      else{
+        console.log(ex);
+        alert('Invalid private key or recipient address');
+      }
     }
   }
 
@@ -40,7 +51,7 @@ function Transfer({ address, setBalance }) {
       <label>
         Recipient
         <input
-          placeholder="Type an address, for example: 0x2"
+          placeholder="Type an address, for example: 029673a11e616b4a75df692b5e2e5a35b228236bb0f9821c058bda858a9d39095e"
           value={recipient}
           onChange={setValue(setRecipient)}
         ></input>
